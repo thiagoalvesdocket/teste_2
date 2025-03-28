@@ -18,8 +18,11 @@ jobs:
       - name: Exportar variáveis do Environment
         run: |
           echo "Exportando variáveis do Environment..."
-          for var in $(jq -r 'keys[]' <<< '${{ toJson(vars) }}'); do
-            echo "export $var='${{ vars[$var] }}'" >> $GITHUB_ENV
+          VAR_LIST=$(jq -r 'keys[]' <<< '${{ toJson(vars) }}')
+
+          for VAR in $VAR_LIST; do
+            VALUE="${{ vars[VAR] }}"
+            echo "$VAR=$VALUE" >> $GITHUB_ENV
           done
 
       - name: Criar override.yaml dinamicamente
@@ -53,9 +56,3 @@ jobs:
 
       - name: Exibir override.yaml gerado
         run: cat override.yaml
-
-      - name: Upload do override.yaml como artefato
-        uses: actions/upload-artifact@v4
-        with:
-          name: override-file
-          path: override.yaml
