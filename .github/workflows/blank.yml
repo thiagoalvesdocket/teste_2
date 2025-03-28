@@ -1,0 +1,48 @@
+name: Cria Override.yaml
+
+on:
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: write
+
+jobs:
+  generate-override:
+    runs-on: ubuntu-latest
+    environment: variaveis
+    steps:
+      - name: Checkout do repositório
+        uses: actions/checkout@v4
+
+      - name: Criar override.yaml dinamicamente
+        run: |
+          echo "secretProviderClass:" > override.yaml
+          echo "  data:" >> override.yaml
+
+          for var in $(printenv | cut -d= -f1); do
+            echo "    - objectName: $var" >> override.yaml
+            echo "      key: $var" >> override.yaml
+          done
+
+          echo "  parameters:" >> override.yaml
+          echo "    objects: |" >> override.yaml
+
+          for var in $(printenv | cut -d= -f1); do
+            echo "      - objectName: \"/eks/docket-documento-ai/\${ENVIRONMENT}/$var\"" >> override.yaml
+            echo "        objectAlias: $var" >> override.yaml
+            echo "        objectType: \"ssmparameter\"" >> override.yaml
+          done
+
+          echo "env:" >> override.yaml
+
+          for var in $(printenv | cut -d= -f1); do
+            echo "  - name: $var" >> override.yaml
+            echo "    valueFrom:" >> override.yaml
+            echo "      secretKeyRef:" >> override.yaml
+            echo "        name: docket-documento-ai-\${ENVIRONMENT}-keys" >> override.yaml
+            echo "        key: $var" >> override.yaml
+          done
+
+      - name: Exibir override.yaml gerado
+        run: cat override.yaml
