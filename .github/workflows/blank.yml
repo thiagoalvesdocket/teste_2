@@ -10,10 +10,17 @@ permissions:
 jobs:
   generate-override:
     runs-on: ubuntu-latest
-    environment: variaveis
+    environment: variaveis  # Garante que as variáveis do Environment "variaveis" sejam carregadas
     steps:
       - name: Checkout do repositório
         uses: actions/checkout@v4
+
+      - name: Exportar variáveis do Environment
+        run: |
+          echo "Exportando variáveis do Environment..."
+          for var in $(jq -r 'keys[]' <<< '${{ toJson(vars) }}'); do
+            echo "export $var='${{ vars[$var] }}'" >> $GITHUB_ENV
+          done
 
       - name: Criar override.yaml dinamicamente
         run: |
@@ -46,3 +53,9 @@ jobs:
 
       - name: Exibir override.yaml gerado
         run: cat override.yaml
+
+      - name: Upload do override.yaml como artefato
+        uses: actions/upload-artifact@v4
+        with:
+          name: override-file
+          path: override.yaml
