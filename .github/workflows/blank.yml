@@ -17,7 +17,7 @@ jobs:
 
       - name: Print name Repo
         run: |
-          REPO_NAME: ${GITHUB_REPOSITORY##*/}
+          REPO_NAME=${GITHUB_REPOSITORY##*/}
           echo "Nome do repositório: $REPO_NAME"
       
       - name: Install AWS CLI
