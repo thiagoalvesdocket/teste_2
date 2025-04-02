@@ -16,8 +16,8 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Pegar o nome do repositório
-        run: |
-          echo "Repo: ${GITHUB_REPOSITORY##*/}"
+        run: | 
+          echo "Repo: ${{ github.repository.split('/')[1] }}"
 
       - name: Install AWS CLI
         run: |
